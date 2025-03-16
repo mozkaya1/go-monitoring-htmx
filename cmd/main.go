@@ -27,7 +27,7 @@ type subscriber struct {
 
 func NewServer() *server {
 	s := &server{
-		subscriberMessageBuffer: 20,
+		subscriberMessageBuffer: 10,
 		subscribers:             make(map[*subscriber]struct{}),
 	}
 	s.mux.Handle("/", http.FileServer(http.Dir("./htmx")))
@@ -50,12 +50,21 @@ func (s *server) addSubscriber(subscriber *subscriber) {
 	fmt.Println("Added subscriber", subscriber)
 }
 
+// Remove subscriber function to delete unused connection, release buffer ...
+func (s *server) removeSubscriber(subscriber *subscriber) {
+	s.subscribersMu.Lock()
+	delete(s.subscribers, subscriber)
+	s.subscribersMu.Unlock()
+	fmt.Println("Removed subscriber", subscriber)
+}
+
 func (s *server) subscribe(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
 	var c *websocket.Conn
 	subscriber := &subscriber{
 		msgs: make(chan []byte, s.subscriberMessageBuffer),
 	}
 	s.addSubscriber(subscriber)
+	defer s.removeSubscriber(subscriber)
 
 	c, err := websocket.Accept(w, r, nil)
 	if err != nil {
@@ -82,9 +91,16 @@ func (s *server) subscribe(ctx context.Context, w http.ResponseWriter, r *http.R
 func (cs *server) publishMsg(msg []byte) {
 	cs.subscribersMu.Lock()
 	defer cs.subscribersMu.Unlock()
-
 	for s := range cs.subscribers {
-		s.msgs <- msg
+		select {
+		case s.msgs <- msg:
+			// Message sent successfully
+		default:
+			// Channel is full, remove the subscriber
+			delete(cs.subscribers, s)
+			close(s.msgs)
+			fmt.Println("Removed subscriber due to full channel", s)
+		}
 	}
 }
 
