@@ -104,14 +104,30 @@ func (cs *server) publishMsg(msg []byte) {
 	}
 }
 
+// Added for optimize with no-fetching data if there are no subscriber ...
+func (s *server) hasSubscribers() bool {
+	s.subscribersMu.Lock()
+	defer s.subscribersMu.Unlock()
+	return len(s.subscribers) > 0
+}
+
 func main() {
 	fmt.Println("Starting monitor server on port 8000")
 	fmt.Println("open browser at http://localhost:8000")
 	s := NewServer()
 
 	go func(srv *server) {
+
+		// Created ticker to check every 1 sec for subscriber
+		ticker := time.NewTicker(1 * time.Second)
+		defer ticker.Stop()
+
 		for {
-			// musti := time.Now().Format("2006-01-02 15:04:05")
+
+			<-ticker.C
+			if !srv.hasSubscribers() {
+				continue
+			}
 			systemData, err := hardware.GetSystemSection()
 			if err != nil {
 				fmt.Println(err, "Get System Error")
