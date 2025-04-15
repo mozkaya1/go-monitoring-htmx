@@ -3,6 +3,9 @@ Monitoring Dynamic Data from Server/PC and get also Weather/Crypto infromation r
 
 ![preview](./static/pic-selected-250316-0000-51.png)
 
+## Code
+[mozkaya1@github.com](https://github.com/mozkaya1/go-monitoring-htmx)
+
 # Real Time Data
 - Current Time
  
@@ -23,17 +26,17 @@ Monitoring Dynamic Data from Server/PC and get also Weather/Crypto infromation r
 
 # Installing / Running Services 
 Clone repository with submodule in it :
-```
+```bash
 git clone --recurse-submodules git@github.com:mozkaya1/go-monitoring-htmx.git
 ```
 And simply you can run it with make command.
 > Docker system needs sudo rights to fetch docker status in the system
-```
+```bash
 cd go-monitoring-htmx
 sudo make run
 ```
 **Output**
-```
+```bash
 [musti@musti-deputyp25 go-monitoring-htmx]$ sudo make run
 Server started on port 8080
 Starting monitor server on port 8000
