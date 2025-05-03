@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"os/exec"
 	"sync"
 	"time"
 
@@ -164,9 +165,12 @@ func main() {
 			}
 
 			timeStamp := time.Now().Format("2006-01-02 15:04:05")
+			up := exec.Command("who", "-b")
+
+			uptime, err := up.Output()
 			msg := []byte(`
       <div hx-swap-oob="innerHTML:#update-timestamp">
-        <p><i style="color: green" class="fa fa-circle"></i> ` + timeStamp + `</p>
+        <p><i style="color: green" class="fa fa-circle"></i> ` + timeStamp + `//` + string(uptime) + `</p>
       </div>
       <div hx-swap-oob="innerHTML:#temp"> ` + coin.WeatherBucket.Temp + `</div>
       <div hx-swap-oob="innerHTML:#weather"> ` + coin.WeatherBucket.WeatherDesc + `</div>
