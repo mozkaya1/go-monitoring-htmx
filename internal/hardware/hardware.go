@@ -25,7 +25,9 @@ func GetDocker() (string, error) {
 
 	html := "<div class='system-data'><table class='table table-striped table-hover table-sm'><thead><tr><th>Name</th><th>Status</th><th>Running</th></tr></thead><tbody>"
 	for i := range dock {
-		html = html + "<tr><td>" + dock[i].Name + "</td><td>" + dock[i].Status + "</td><td>" + strconv.FormatBool(dock[i].Running) + "</td></tr>"
+		if dock[i].Running {
+			html = html + "<tr><td>" + dock[i].Name + "</td><td>" + dock[i].Status + "</td><td>" + strconv.FormatBool(dock[i].Running) + "</td></tr>"
+		}
 	}
 	// fmt.Println(dock[0].Running, dock[0].Name, dock[0].Image, dock[0].Status, err)
 	html = html + "</tbody></table></div>"
